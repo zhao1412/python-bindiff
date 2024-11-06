@@ -120,8 +120,8 @@ class BindiffFile(object):
 
         # Instruction matches
         # {inst_addr : {match_func_addr : match_inst_addr}}
-        self.primary_instruction_match: dict[Addr, dict[Addr, Addr]] = {}
-        self.secondary_instruction_match: dict[Addr, dict[Addr, Addr]] = {}
+        self.primary_instruction_match: dict[int, dict[int, int]] = {}
+        self.secondary_instruction_match: dict[int, dict[int, int]] = {}
         self._load_instruction_match(self.db.cursor())
 
     @property
@@ -168,9 +168,11 @@ class BindiffFile(object):
 
         :param cursor: sqlite3 cursor to the DB
         """
-        query = "SELECT * FROM file"
-        self.primary_file = File(*cursor.execute(query).fetchone())
-        self.secondary_file = File(*cursor.execute(query).fetchone())
+        files = cursor.execute("SELECT * FROM file").fetchall()
+        assert len(files) >= 2
+
+        self.primary_file = File(*files[0])
+        self.secondary_file = File(*files[1])
 
     def _load_metadata(self, cursor: sqlite3.Cursor) -> None:
         """
